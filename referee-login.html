@@ -77,3 +77,54 @@
   </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Change Password</title>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <h2>Change Your Password</h2>
+  <input type="password" id="newPassword" placeholder="New Password"><br><br>
+  <button onclick="changePassword()">Save</button>
+
+  <script>
+    // ✅ Paste your Firebase config here
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function changePassword() {
+      const newPassword = document.getElementById("newPassword").value;
+      const refKey = localStorage.getItem("refKey");
+
+      if (!refKey) {
+        alert("Invalid session. Please log in again.");
+        window.location.href = "index.html";
+        return;
+      }
+
+      db.ref("referees/" + refKey).update({
+        password: newPassword,
+        changed: true
+      }).then(() => {
+        alert("Password changed successfully. Please log in again.");
+        localStorage.removeItem("refKey");
+        window.location.href = "index.html";
+      }).catch(error => {
+        alert("Error updating password: " + error.message);
+      });
+    }
+  </script>
+</body>
+</html>
