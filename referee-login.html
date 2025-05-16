@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Referee Login</title>
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <h2>Referee Login</h2>
+  <input type="text" id="username" placeholder="Username" /><br /><br />
+  <input type="password" id="password" placeholder="Password" /><br /><br />
+  <button onclick="login()">Login</button>
+
+  <script>
+    // 🔑 *** REPLACE the below config with YOUR Firebase project config ***
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!username || !password) {
+        alert("Please enter both username and password.");
+        return;
+      }
+
+      // Read referees data from Firebase Realtime Database
+      db.ref("referees").once("value").then(snapshot => {
+        const data = snapshot.val();
+        if (!data) {
+          alert("No referees found in database.");
+          return;
+        }
+
+        let userFound = false;
+        for (let key in data) {
+          if (
+            data[key].username === username &&
+            data[key].password === password
+          ) {
+            userFound = true;
+            if (data[key].changed) {
+              alert("Login successful. Redirecting to referee panel...");
+              // TODO: Replace below URL with your actual referee panel page
+              window.location.href = "referee-panel.html";
+            } else {
+              // Save current user key to localStorage for password change page
+              localStorage.setItem("refKey", key);
+              window.location.href = "change-password.html";
+            }
+            break;
+          }
+        }
+        if (!userFound) {
+          alert("Invalid username or password");
+        }
+      }).catch(error => {
+        console.error("Error reading from database:", error);
+        alert("Error connecting to database. Try again later.");
+      });
+    }
+  </script>
+</body>
+</html>
